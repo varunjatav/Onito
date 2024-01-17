@@ -11,3 +11,7 @@ form > div div{
     align-items: center;
     gap: 25px;
 }
+.country div{
+    display: flex;
+    flex-direction: column;
+}
