@@ -6,6 +6,7 @@ import './index.css'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import Personal from './components/Personal.tsx'
 import Address from './components/Address.tsx'
+import  Table  from './components/Table.tsx'
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,11 @@ const router = createBrowserRouter([
   ,{
     path:"/stepTwo",
     element: <Address/>
-  }]
+  },{
+    path:"/dataTable",
+    element: <Table/>
+  }
+]
   }
 ])
 ReactDOM.createRoot(document.getElementById('root')!).render(

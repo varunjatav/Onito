@@ -10,7 +10,7 @@ let addressSchema = object({
   State: string(),
   City: string(),
   Country: string(),
-  Pincode: number().required(),
+  Pincode: number(),
 });
 
 
@@ -25,8 +25,8 @@ type IFormInput = {
 const Address = () => {
 
   const { register, handleSubmit } = useForm<IFormInput>( { resolver : yupResolver(addressSchema) as any });
-  const countryRef = useRef<HTMLInputElement>(null);
-  console.log(countryRef);
+  const countryRef = useRef<string>("");
+  console.log("country ref : ",countryRef.current);
   
   const [filteredCountries, setFilteredCountries] = useState<string[]>([]);
   console.log(filteredCountries);
@@ -37,13 +37,10 @@ const Address = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`https://restcountries.com/v3.1/name/${countryRef.current?.value}`);
+        const response = await fetch(`https://restcountries.com/v3.1/name/${countryRef.current}`);
         const data = await response.json();
-        const countryNames = data.map((country: any) => {
-          country.name.common;
-          console.log(country);
-          
-        });
+        console.log(data);
+        const countryNames = data.map((country: any) =>  country.name.common );
         setFilteredCountries(countryNames);
       } catch (error) {
         console.error(error);
@@ -52,12 +49,12 @@ const Address = () => {
       }
     };
 
-    if (countryRef.current?.value) {
+    if (countryRef.current) {
       fetchData();
     } else {
       setFilteredCountries([]);
     }
-  }, [countryRef.current?.value]);
+  }, [countryRef.current]);
   
 
     
@@ -92,7 +89,8 @@ const Address = () => {
               placeholder="Enter Country"
               {...register('Country')}
               type="text"
-              ref={countryRef}
+              // ref={countryRef}
+              onChange={(e) => (countryRef.current = e.target.value)}
             />
             {loading && <p>Loading...</p>}
             {filteredCountries.length > 0 && (
