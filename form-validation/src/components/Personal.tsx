@@ -2,9 +2,12 @@ import { Container } from "@mui/material";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { object, string, number } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DataTable from "datatables.net-dt";
-import { useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { User, addUser } from "../store/userSlice";
+import { RootState, AppDispatch } from '../store/index';
 
 let userSchema = object({
   Name: string().required("Name is required").min(3),
@@ -21,46 +24,64 @@ let userSchema = object({
   GovtIssuedIDType: string().oneOf(["Adhar", "PAN"]),
   GovtIssuedId: number(),
 });
-enum GenderEnum {
-  female = "female",
-  male = "male",
-}
-enum GovtIDType {
-  Adhar = "Adhar",
-  PAN = "PAN",
-}
-type IFormInput = {
-  Name: string;
-  Age: number;
-  Sex: GenderEnum;
-  Mobile: number;
-  GovtIssuedIDType?: GovtIDType;
-  GovtIssuedId?: number;
-};
-// let table = new DataTable("#example");
-// console.log(table);
+
 
 const Personal = () => {
-  // const navigate = useNavigate();
+ const navigate = useNavigate();
+ const dispatch:AppDispatch = useDispatch();
+ const users = useSelector((store:RootState) => store.user.users);
+ console.log("users", users);
+ 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFormInput>({ resolver: yupResolver(userSchema) as any });
-  // const submittedData: IFormInput[] = [];
-  const [submittedData,setSubmittedData] = useState<any | []>([]);
-  const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    setSubmittedData(data)
-    // submittedData.push(data);
+  } = useForm<User>({ resolver: yupResolver(userSchema) as any });
+  
+  const usersData: any[] = users.map(user => [
+    user.Name,
+    user.Age,
+    user.Sex,
+    user.Mobile,
+    user.GovtIssuedIDType,
+    user.GovtIssuedId,
+  ]);
+  const onSubmit: SubmitHandler<User> = (data) => {
+    
     console.log(data);
-    console.log(submittedData);
-
-    // navigate("/stepTwo")
+ 
+    dispatch(addUser(data));
   };
-  let table = new DataTable("#example",{
-    // responsive: true
-  });
-  console.log(table);
+  useEffect(() => {
+    const initializeDataTable = () => {
+      const table = new DataTable("#example", {
+        data: usersData,
+        columns: [
+          { title: "Name" },
+          { title: "Age" },
+          { title: "Sex" },
+          { title: "Mobile" },
+          { title: "GovtIssuedIDType" },
+          { title: "GovtIssuedId" },
+        ],
+      });
+
+      // Optionally destroy the DataTable instance on component unmount
+      return () => {
+        table.destroy();
+      };
+    };
+
+    // Check if users data is available before initializing DataTable
+    if (users && users.length > 0) {
+      const destroyDataTable = initializeDataTable();
+      return destroyDataTable;
+    }
+  }, [users]);
+  const handleNext = ():void => {
+    // table.destroy();
+    navigate('/address')
+  }
   
   return (
     <>
@@ -121,6 +142,7 @@ const Personal = () => {
           </div>
 
           <input type="submit" value="Submit" />
+         
         </form>
       </Container>
       <table id="example" className="display" style={{ width: "100%" }}>
@@ -135,9 +157,9 @@ const Personal = () => {
           </tr>
         </thead>
         <tbody>
-          {submittedData &&
-            submittedData.map((data:IFormInput) => (
-              <tr>
+          {/* {users &&
+            users.map((data:User,index) => (
+              <tr key={index}>
                 <td>{data.Name}</td>
                 <td>{data.Age}</td>
                 <td>{data.Sex}</td>
@@ -145,18 +167,20 @@ const Personal = () => {
                 <td>{data.GovtIssuedIDType}</td>
                 <td>{data.GovtIssuedId}</td>
               </tr>
-            ))}
+            ))} */}
 
           <tr>
             <td>Garrett Winters</td>
-            <td>Accountant</td>
-            <td>Tokyo</td>
-            <td>63</td>
-            <td>2011-07-25</td>
-            <td>$170,750</td>
+            <td>31</td>
+            <td>Male</td>
+            <td>9453909042</td>
+            <td>Adhar</td>
+            <td>6044 6321 6470</td>
           </tr>
         </tbody>
       </table>
+
+       <button onClick={handleNext}>Next</button>
     </>
   );
 };
