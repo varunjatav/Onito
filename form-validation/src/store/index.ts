@@ -1,10 +1,12 @@
 // store.ts
 import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './userSlice';
+import addressReducer from './addressSlice';
 
 const store = configureStore({
   reducer: {
     user: userReducer,
+    address: addressReducer
   },
 });
 

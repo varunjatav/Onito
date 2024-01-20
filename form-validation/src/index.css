@@ -2,22 +2,23 @@ form > div {
   display: flex;
   align-items: start;
   flex-wrap: wrap;
+  flex-direction: column;
   gap: 20px;
   margin-bottom: 20px;
+  width: 100%;
 }
 form > div div {
-  display: flex;
-  align-items: center;
-  gap: 25px;
+ 
+  width: 100%;
 }
-.country {
+.GovtIssueId{
   display: flex;
-  align-items: start;
+  gap: 10px;
+} 
+.GovtIssueId .Id_Select {
+width: 20%;
 }
-.country div {
-  display: flex;
-  flex-direction: column;
-}
+
 .country div ul {
   list-style-type: none;
   text-align: center;
@@ -50,4 +51,7 @@ form > div div {
   text-align: left;
   background-color: #04aa6d;
   color: white;
+}
+span{
+  color: red;
 }

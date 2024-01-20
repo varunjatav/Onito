@@ -1,13 +1,22 @@
-import { Container } from "@mui/material";
+import {
+  Button,
+  Container,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { object, string, number } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
 import DataTable from "datatables.net-dt";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { User, addUser } from "../store/userSlice";
-import { RootState, AppDispatch } from '../store/index';
+import { RootState, AppDispatch } from "../store/index";
 
 let userSchema = object({
   Name: string().required("Name is required").min(3),
@@ -22,23 +31,44 @@ let userSchema = object({
       return regex.test(value.toString());
     }),
   GovtIssuedIDType: string().oneOf(["Adhar", "PAN"]),
-  GovtIssuedId: number(),
+  GovtIssuedId: number()
+  // .when("GovtIssuedIDType", {
+  //   is: "Adhar",
+  //   then: number()
+  //     .required("Government Issued ID is required")
+  //     .test("is-12-digits", "Adhar ID should be of 12 digits", (value) => {
+  //       const regex = /^\d{12}$/;
+  //       return regex.test(value.toString());
+  //     }),
+  //   otherwise: string()
+  //     .required("Government Issued ID is required")
+  //     .test("is-10-digits", "PAN ID should be of 10 digits", (value) => {
+  //       const regex = /^\d{10}$/;
+  //       return regex.test(value.toString());
+  //     }),
+  // }),
 });
 
-
 const Personal = () => {
- const navigate = useNavigate();
- const dispatch:AppDispatch = useDispatch();
- const users = useSelector((store:RootState) => store.user.users);
- console.log("users", users);
- 
+  const navigate = useNavigate();
+  const dispatch: AppDispatch = useDispatch();
+  const users = useSelector((store: RootState) => store.user.users);
+  const dataTableRef = useRef<any>(null);
+  const [selectedIdType, setSelectedIdType] = useState<string>('');
+  const [gender, setGender] = useState<string>("");
+  const handleChange = (e: SelectChangeEvent) => {
+    setGender(e.target.value);
+  };
+  const handleIdTypeChange =(e: SelectChangeEvent) =>{
+    setSelectedIdType(e.target.value);
+  }
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<User>({ resolver: yupResolver(userSchema) as any });
-  
-  const usersData: any[] = users.map(user => [
+
+  const usersData: any[] = users.map((user) => [
     user.Name,
     user.Age,
     user.Sex,
@@ -47,14 +77,13 @@ const Personal = () => {
     user.GovtIssuedId,
   ]);
   const onSubmit: SubmitHandler<User> = (data) => {
-    
     console.log(data);
- 
+
     dispatch(addUser(data));
   };
   useEffect(() => {
-    const initializeDataTable = () => {
-      const table = new DataTable("#example", {
+    if (users && users.length > 0) {
+      dataTableRef.current = new DataTable("#example", {
         data: usersData,
         columns: [
           { title: "Name" },
@@ -68,57 +97,76 @@ const Personal = () => {
 
       // Optionally destroy the DataTable instance on component unmount
       return () => {
-        table.destroy();
+        if (dataTableRef.current) {
+          dataTableRef.current.destroy();
+        }
       };
-    };
-
-    // Check if users data is available before initializing DataTable
-    if (users && users.length > 0) {
-      const destroyDataTable = initializeDataTable();
-      return destroyDataTable;
     }
-  }, [users]);
-  const handleNext = ():void => {
-    // table.destroy();
-    navigate('/address')
-  }
-  
+  }, [users, usersData]);
+
+  const handleNext = (): void => {
+    navigate("/address");
+  };
+
   return (
-    <>
+    <div>
       <Container maxWidth="md">
-        <h2>Personal Details</h2>
+        <Typography variant="h4">Personal Details</Typography>
+
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>
             <div>
-              <label htmlFor="Name">Name</label>
-              <input
+              <Typography variant="body1" color="black">
+                Name
+              </Typography>
+              <TextField
+                variant="outlined"
+                size="small"
                 {...register("Name")}
                 placeholder="Enter Name"
                 type="text"
+                required
               />
             </div>
             {errors.Name && <span>{errors.Name.message}</span>}
             <div>
-              <label htmlFor="Age">Date of Birth or Age</label>
-              <input
+              <Typography variant="body1" color="black">
+                {" "}
+                Age
+              </Typography>
+              <TextField
+                variant="outlined"
+                size="small"
                 {...register("Age")}
-                placeholder="DD/MM/YYYY or Age in Years"
+                placeholder="Age in Years"
                 type="text"
+                required
               />
             </div>
             {errors.Age && <span>Age is required</span>}
             <div>
-              <label htmlFor="Sex">Sex</label>
-              <select {...register("Sex")} name="Sex">
-                <option value="">None</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
+              <InputLabel id="demo-simple-select-label">Sex</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                label="Sex"
+                value={gender}
+                {...register("Sex", { onChange: handleChange })}
+                required
+              >
+                <MenuItem value="">None</MenuItem>
+                <MenuItem value="Male">Male</MenuItem>
+                <MenuItem value="Female">Female</MenuItem>
+              </Select>
             </div>
             {errors.Sex && <span>{errors.Sex.message}</span>}
             <div>
-              <label htmlFor="Mobile">Mobile</label>
-              <input
+              <Typography variant="body1" color="black">
+                Mobile
+              </Typography>
+              <TextField
+                variant="outlined"
+                size="small"
                 placeholder="Enter Mobile"
                 {...register("Mobile")}
                 type="text"
@@ -126,23 +174,34 @@ const Personal = () => {
             </div>
 
             <div>
-              <label htmlFor="Mobile">Government Issue ID </label>
-              <select {...register("GovtIssuedIDType")}>
-                <option value="">ID Type</option>
-                <option value="Adhar">Adhar</option>
-                <option value="PAN">PAN</option>
-              </select>
-              <input
-                placeholder="Enter Govt ID"
-                {...register("GovtIssuedId")}
-                type="text"
-              />
+              <InputLabel id="demo-simple-select-label">
+                Government Issue ID{" "}
+              </InputLabel>
+              <div className="GovtIssueId">
+                <Select
+                  className="Id_Select"
+                  value={selectedIdType}
+                  // onChange: handleIdTypeChange 
+                  {...register("GovtIssuedIDType", { onChange: handleIdTypeChange  })}
+                >
+                  <MenuItem value="">ID Type</MenuItem>
+                  <MenuItem value="Adhar">Adhar</MenuItem>
+                  <MenuItem value="PAN">PAN</MenuItem>
+                </Select>
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  placeholder="Enter Govt ID"
+                  {...register("GovtIssuedId")}
+                  type="text"
+                />
+              </div>
             </div>
             {errors.GovtIssuedId && <span>Govt Issued Id is required</span>}
           </div>
-
-          <input type="submit" value="Submit" />
-         
+          <Button variant="outlined" color="secondary" type="submit">
+            Submit
+          </Button>
         </form>
       </Container>
       <table id="example" className="display" style={{ width: "100%" }}>
@@ -157,31 +216,25 @@ const Personal = () => {
           </tr>
         </thead>
         <tbody>
-          {/* {users &&
-            users.map((data:User,index) => (
-              <tr key={index}>
-                <td>{data.Name}</td>
-                <td>{data.Age}</td>
-                <td>{data.Sex}</td>
-                <td>{data.Mobile}</td>
-                <td>{data.GovtIssuedIDType}</td>
-                <td>{data.GovtIssuedId}</td>
-              </tr>
-            ))} */}
-
           <tr>
-            <td>Garrett Winters</td>
-            <td>31</td>
-            <td>Male</td>
-            <td>9453909042</td>
-            <td>Adhar</td>
-            <td>6044 6321 6470</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
           </tr>
         </tbody>
       </table>
-
-       <button onClick={handleNext}>Next</button>
-    </>
+      <Button
+        variant="outlined"
+        color="secondary"
+        type="submit"
+        onClick={handleNext}
+      >
+        Next
+      </Button>
+    </div>
   );
 };
 
