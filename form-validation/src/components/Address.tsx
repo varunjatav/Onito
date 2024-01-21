@@ -81,7 +81,7 @@ const Address = () => {
           { title: "Address" },
           { title: "State" },
           { title: "City" },
-          { title: "Cuntry" },
+          { title: "Country" },
           { title: "Pincode" },
         ],
       });
