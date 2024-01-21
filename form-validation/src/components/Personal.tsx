@@ -31,37 +31,29 @@ let userSchema = object({
       return regex.test(value.toString());
     }),
   GovtIssuedIDType: string().oneOf(["Adhar", "PAN"]),
-  GovtIssuedId: number()
-  // .when("GovtIssuedIDType", {
-  //   is: "Adhar",
-  //   then: number()
-  //     .required("Government Issued ID is required")
-  //     .test("is-12-digits", "Adhar ID should be of 12 digits", (value) => {
-  //       const regex = /^\d{12}$/;
-  //       return regex.test(value.toString());
-  //     }),
-  //   otherwise: string()
-  //     .required("Government Issued ID is required")
-  //     .test("is-10-digits", "PAN ID should be of 10 digits", (value) => {
-  //       const regex = /^\d{10}$/;
-  //       return regex.test(value.toString());
-  //     }),
-  // }),
+  GovtIssuedId: number().when('GovtIssuedIDType', ([govtIssuedIDType]) => {
+    return govtIssuedIDType == "Adhar" ? number().required().test('length','Min 12', value=>{
+      const stringValue = value.toString();
+      return stringValue.length === 12;
+    }) : number().required().test('length','Min 10', value=>{
+      const stringValue = value.toString();
+      return stringValue.length === 10;
+    });
+  })
 });
-
 const Personal = () => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
   const users = useSelector((store: RootState) => store.user.users);
   const dataTableRef = useRef<any>(null);
-  const [selectedIdType, setSelectedIdType] = useState<string>('');
+  const [selectedIdType, setSelectedIdType] = useState<string>("");
   const [gender, setGender] = useState<string>("");
   const handleChange = (e: SelectChangeEvent) => {
     setGender(e.target.value);
   };
-  const handleIdTypeChange =(e: SelectChangeEvent) =>{
+  const handleIdTypeChange = (e: SelectChangeEvent) => {
     setSelectedIdType(e.target.value);
-  }
+  };
   const {
     register,
     handleSubmit,
@@ -109,7 +101,7 @@ const Personal = () => {
   };
 
   return (
-    <div>
+    <div className="mainContainer">
       <Container maxWidth="md">
         <Typography variant="h4">Personal Details</Typography>
 
@@ -152,12 +144,13 @@ const Personal = () => {
                 label="Sex"
                 value={gender}
                 {...register("Sex", { onChange: handleChange })}
+                size="small"
                 required
               >
                 <MenuItem value="">None</MenuItem>
                 <MenuItem value="Male">Male</MenuItem>
                 <MenuItem value="Female">Female</MenuItem>
-              </Select>
+              </Select>
             </div>
             {errors.Sex && <span>{errors.Sex.message}</span>}
             <div>
@@ -178,16 +171,18 @@ const Personal = () => {
                 Government Issue ID{" "}
               </InputLabel>
               <div className="GovtIssueId">
-                <Select
+                
+              <Select
                   className="Id_Select"
                   value={selectedIdType}
                   // onChange: handleIdTypeChange 
                   {...register("GovtIssuedIDType", { onChange: handleIdTypeChange  })}
+                  size="small"
                 >
                   <MenuItem value="">ID Type</MenuItem>
                   <MenuItem value="Adhar">Adhar</MenuItem>
                   <MenuItem value="PAN">PAN</MenuItem>
-                </Select>
+                </Select>
                 <TextField
                   variant="outlined"
                   size="small"
@@ -197,7 +192,7 @@ const Personal = () => {
                 />
               </div>
             </div>
-            {errors.GovtIssuedId && <span>Govt Issued Id is required</span>}
+            {errors.GovtIssuedId && <span>{errors.GovtIssuedId.message}</span>}
           </div>
           <Button variant="outlined" color="secondary" type="submit">
             Submit
@@ -215,16 +210,7 @@ const Personal = () => {
             <th>Issued Id</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
+        <tbody></tbody>
       </table>
       <Button
         variant="outlined"

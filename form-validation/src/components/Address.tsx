@@ -33,8 +33,10 @@ const Address = () => {
 
   const [loading, setLoading] = useState<boolean>(false);
   const dataTableRef = useRef<any>(null);
-  useEffect(() => {
-    const fetchData = async () => {
+
+  const handleChange = (e:any) => {
+    countryRef.current = e.target.value
+      const fetchData = async () => {
       try {
         setLoading(true);
         const response = await fetch(
@@ -56,8 +58,7 @@ const Address = () => {
     } else {
       setFilteredCountries([]);
     }
-  }, [countryRef.current]);
-
+  }
 
   const addressData: any[] = address.map((add) => [
     add.Address,
@@ -67,6 +68,7 @@ const Address = () => {
     add.Pincode,
   ]);
   const onSubmit: SubmitHandler<AddressInf> = (data) => {
+    setFilteredCountries([]);
     console.log(data);
     dispatch(addAddress(data));
   };
@@ -93,7 +95,7 @@ const Address = () => {
     }
   }, [address, addressData]);
   return (
-    <div>
+    <div className="mainContainer">
     <Container maxWidth="md">
       <Typography variant="h4">Address Details</Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -146,19 +148,19 @@ const Address = () => {
               placeholder="Enter Country"
               {...register("Country")}
               type="text"
-              onChange={(e) => (countryRef.current = e.target.value)}
+              onChange={(e) => {handleChange(e)}}
               variant="outlined"
               size="small"
             />
             {loading && <p>Loading...</p>}
             {filteredCountries.length > 0 && (
-              <ul>
+              <ul className="countryList">
                 {filteredCountries.map((country, index) => (
                   <li key={index}>{country}</li>
                 ))}
               </ul>
             )}
-            <div></div>
+           
           </div>
 
           <div>
@@ -189,13 +191,7 @@ const Address = () => {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-          </tr>
+          
         </tbody>
       </table>
       </div>

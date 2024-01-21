@@ -1,4 +1,5 @@
-import React, { Component, ErrorInfo, ReactNode } from "react";
+import { Container, Typography } from "@mui/material";
+import  { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children?: ReactNode;
@@ -24,7 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
-      return <h1>Sorry.. there was an error</h1>;
+      return <Container><Typography variant="h3" align="center">Sorry.. there was an error</Typography></Container>;
     }
 
     return this.props.children;
