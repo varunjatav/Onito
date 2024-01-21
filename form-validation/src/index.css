@@ -1,11 +1,13 @@
 .mainContainer{
   margin-top: 100px;
 }
+form{
+  margin-top: 10px;
+}
 form > div {
   display: flex;
   align-items: start;
   flex-wrap: wrap;
-  /* flex-direction: column; */
   gap: 20px;
   margin-bottom: 20px;
   width: 100%;

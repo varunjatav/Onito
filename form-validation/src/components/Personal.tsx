@@ -103,7 +103,7 @@ const Personal = () => {
   return (
     <div className="mainContainer">
       <Container maxWidth="md">
-        <Typography variant="h4">Personal Details</Typography>
+        <Typography variant="h4" sx={{ textDecoration: "underline" }}>Personal Details</Typography>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div>

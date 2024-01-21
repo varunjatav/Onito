@@ -97,7 +97,7 @@ const Address = () => {
   return (
     <div className="mainContainer">
     <Container maxWidth="md">
-      <Typography variant="h4">Address Details</Typography>
+      <Typography variant="h4"  sx={{ textDecoration: "underline" }}>Address Details</Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <div>
